@@ -1,0 +1,5 @@
+{
+	"authentication": "--authentication--",
+	"url": "--url--",
+	"port": 8080
+}
