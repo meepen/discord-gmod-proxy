@@ -1,5 +1,14 @@
 {
-	"authentication": "--authentication--",
-	"url": "--url--",
-	"port": 8080
+	"port": 8080,
+	"channels": {
+		"errors": {
+			"url": "discord webhook url",
+			"authentication": "get auth parameter"
+		},
+
+		"drops": {
+			"url": "discord webhook url",
+			"authentication": "authentication html header"
+		}
+	}
 }

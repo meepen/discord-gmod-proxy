@@ -10,46 +10,47 @@ app.use(bodyParser.urlencoded({
 	extended: true
 }));
 
-app.post("/", (req, res) => {
-	if (req.get("authentication") !== config.authentication) {
-		res.writeHead(504);
-		res.end("bad authentication");
-		return;
-	}
+app.post("/discord/:channel", (req, res) => {
+	let channel = config.channels[req.params.channel];
 
-	if (!req.body || !req.body.data) {
-		res.writeHead(400);
-		res.end("bad data");
-		return;
-	}
-
-	let json;
-	try {
-		json = JSON.parse(req.body.data);
-	}
-	catch(E) {
-		res.writeHead(400);
-		res.end("bad data");
-		return;
-	}
-
-	axios.post(config.url, json).then(proxyres => {
-		res.writeHead(proxyres.status, proxyres.statusText, proxyres.headers);
-		res.end();
-	}).catch(reason => {
-		res.writeHead(500, reason.toString());
-		res.end();
-	});
-});
-
-app.post("/lua", (req, res) => {
-	if (!config.lua_url) {
+	if (!channel) {
 		res.writeHead(404);
 		res.end();
 		return;
 	}
 
-	if (req.query.auth !== config.authentication) {
+	if (req.get("authentication") !== channel.authentication) {
+		res.writeHead(504);
+		res.end("bad authentication");
+		return;
+	}
+
+	if (!req.body) {
+		res.writeHead(400);
+		res.end("bad data");
+		return;
+	}
+
+	axios({
+		method: "post",
+		url: channel.url,
+		data: req.body
+	}).then(proxyres => {
+		res.writeHead(proxyres.status, proxyres.statusText, proxyres.headers);
+		res.end();
+	});
+});
+
+app.post("/errors", (req, res) => {
+	let channel = config.channels.errors;
+
+	if (!channel) {
+		res.writeHead(404);
+		res.end();
+		return;
+	}
+
+	if (req.query.auth !== channel.authentication) {
 		res.writeHead(504);
 		res.end();
 		return;
@@ -61,7 +62,7 @@ app.post("/lua", (req, res) => {
 		return;
 	}
 
-	axios.post(config.lua_url, {
+	axios.post(channel.url, {
 		embeds: [
 			{
 				color: 16711680,
@@ -89,7 +90,6 @@ app.post("/lua", (req, res) => {
 		res.writeHead(500);
 		res.end();
 	});
-
 });
 
 app.listen(config.port);
