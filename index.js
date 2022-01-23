@@ -92,4 +92,4 @@ app.post("/errors", (req, res) => {
 	});
 });
 
-app.listen(config.port);
+app.listen(config.port, config.host);
